@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "spring.jda.token",
+  "type": "java.lang.String",
+  "description": "Discord connection token"
+}]}
