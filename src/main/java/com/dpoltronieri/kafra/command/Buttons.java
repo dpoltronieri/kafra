@@ -6,11 +6,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dpoltronieri.kafra.data.UserDTO;
-import com.dpoltronieri.kafra.data.UserDTORepository;
+import com.dpoltronieri.kafra.service.DataPersistenceService;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -23,8 +21,23 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 @Service
 public class Buttons implements Command {
 
+    // @Autowired
+    // GuildDTORepository guildDTORepository;
+
+    // @Autowired
+    // MemberDTORepository memberDTORepository;
+
+    // @Autowired
+    // RoleDTORepository roleDTORepository;
+
+    // @Autowired
+    // TextChannelDTORepository textChannelDTORepository;
+
+    // @Autowired
+    // UserDTORepository userDTORepository;
+
     @Autowired
-    UserDTORepository userDTORepository;
+    DataPersistenceService dataPersistenceService;
 
     @Override
     public String getName() {
@@ -54,13 +67,27 @@ public class Buttons implements Command {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
-        User user = event.getUser();
-        try{
-        UserDTO userDTO = new UserDTO(user);
-        userDTORepository.save(userDTO);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        dataPersistenceService.saveDataFromInteraction(event);
+
+        // User user = event.getUser();
+        // try{
+        // UserDTO userDTO = new UserDTO(user);
+        // userDTORepository.save(userDTO);
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
+        // Guild guild = event.getGuild();
+        // try{
+        // guildDTORepository.save(new GuildDTO(guild));
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
+        // Member member = event.getMember();
+        // try{
+        // memberDTORepository.save(new MemberDTO(member));
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+
 
 
         EmbedBuilder embedBuilder = new EmbedBuilder();

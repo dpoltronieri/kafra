@@ -5,15 +5,21 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import net.dv8tion.jda.api.entities.User;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+    @Index(name = "idx_user_id", columnList = "user_id", unique = true)
+})
 public class UserDTO {
     @Id // Mark this field as the primary key
     @GeneratedValue(strategy = GenerationType.IDENTITY) 
-    private Integer id; 
+    private Long id; 
+
+    @Column(unique = true, nullable = false)
+    private Long userId; 
 
     @Column //(name = "user_name") // Optional: Specify column name if different from field name
     private String username; 
@@ -30,21 +36,29 @@ public class UserDTO {
     @Column
     private boolean system;
 
-    @Column //(name = "created_at") 
-    private String createdAt;
     
-    @Column
-    private String discordID; 
-    
-        public UserDTO(User user) {
+    public UserDTO(User user) {
             // this.id = 
-        this.discordID = user.getId();
+        this.userId = user.getIdLong();
         this.username = user.getName();
         this.discriminator = user.getDiscriminator();
         this.avatarUrl = user.getAvatarUrl();
         this.bot = user.isBot();
         this.system = user.isSystem();
-        this.createdAt = user.getTimeCreated().toString(); 
+    }
+
+
+    public UserDTO() {
+    }
+
+
+    public void updateUserDTO(User user) {
+        // this.discordID = user.getId();
+        this.username = user.getName();
+        this.discriminator = user.getDiscriminator();
+        this.avatarUrl = user.getAvatarUrl();
+        this.bot = user.isBot();
+        this.system = user.isSystem();
     }
 
     // Getters and Setters
@@ -58,16 +72,15 @@ public class UserDTO {
                 ", avatarUrl='" + avatarUrl + '\'' +
                 ", bot=" + bot +
                 ", system=" + system +
-                ", createdAt='" + createdAt + '\'' +
                 '}';
     }
 
 
-    public Integer getId() {
+    public Long getId() {
         return this.id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -119,21 +132,15 @@ public class UserDTO {
         this.system = system;
     }
 
-    public String getCreatedAt() {
-        return this.createdAt;
+    public Long getUserId() {
+        return this.userId;
     }
 
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
+    public void setUserId(Long discordID) {
+        this.userId = discordID;
     }
 
-    public String getDiscordID() {
-        return this.discordID;
-    }
 
-    public void setDiscordID(String discordID) {
-        this.discordID = discordID;
-    }
     
 
 }
