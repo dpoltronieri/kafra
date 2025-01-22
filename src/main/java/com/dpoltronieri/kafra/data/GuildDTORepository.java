@@ -5,11 +5,10 @@ import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface GuildDTORepository extends JpaRepository<GuildDTO, Integer> {
+public interface GuildDTORepository extends JpaRepository<GuildDTO, Long> {
     @SuppressWarnings("null")
-    Optional<GuildDTO> findById(@NotNull Integer id);
+    Optional<GuildDTO> findById(@NotNull Long id);
 
-    @SuppressWarnings("null")
     Optional<GuildDTO> findByGuildId(@NotNull Long guildId);
 
 }

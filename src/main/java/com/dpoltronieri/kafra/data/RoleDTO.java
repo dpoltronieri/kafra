@@ -3,6 +3,8 @@ package com.dpoltronieri.kafra.data;
 import jakarta.persistence.*;
 import net.dv8tion.jda.api.entities.Role;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "roles")
 public class RoleDTO {
@@ -13,6 +15,10 @@ public class RoleDTO {
 
     @Column(unique = true, nullable = false)
     private Long roleId;
+
+    @ManyToOne
+    @JoinColumn(name = "guild_id")
+    private GuildDTO guild;
 
     private String name;
 
@@ -26,8 +32,21 @@ public class RoleDTO {
 
     private boolean isPublicRole;
 
-    public RoleDTO(Role role) {
+    public RoleDTO(Role role, GuildDTO guildDTO) {
         this.roleId = role.getIdLong();
+        this.name = role.getName();
+        this.position = role.getPosition();
+        this.isMentionable = role.isMentionable();
+        this.isHoisted = role.isHoisted();
+        this.isManaged = role.isManaged();
+        this.isPublicRole = role.isPublicRole();
+        this.guild = guildDTO;
+    }
+
+    public RoleDTO() {
+    }
+
+    public void updateRoleDTO(Role role) {
         this.name = role.getName();
         this.position = role.getPosition();
         this.isMentionable = role.isMentionable();
@@ -36,9 +55,16 @@ public class RoleDTO {
         this.isPublicRole = role.isPublicRole();
     }
 
-    public RoleDTO() {
+    public boolean hasChanged(Role role) {
+        return !Objects.equals(this.name, role.getName()) ||
+                this.position != role.getPosition() ||
+                this.isMentionable != role.isMentionable() ||
+                this.isHoisted != role.isHoisted() ||
+                this.isManaged != role.isManaged() ||
+                this.isPublicRole != role.isPublicRole();
     }
 
+    // Getters and Setters ...
 
     public Long getId() {
         return this.id;
@@ -54,6 +80,14 @@ public class RoleDTO {
 
     public void setRoleId(Long roleId) {
         this.roleId = roleId;
+    }
+
+    public GuildDTO getGuild() {
+        return this.guild;
+    }
+
+    public void setGuild(GuildDTO guildDTO) {
+        this.guild = guildDTO;
     }
 
     public String getName() {
@@ -119,5 +153,4 @@ public class RoleDTO {
     public void setIsPublicRole(boolean isPublicRole) {
         this.isPublicRole = isPublicRole;
     }
-    
 }

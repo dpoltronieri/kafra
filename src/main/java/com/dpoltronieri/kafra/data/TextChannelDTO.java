@@ -5,8 +5,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "text_channels")
@@ -19,6 +23,10 @@ public class TextChannelDTO {
     @Column(unique = true, nullable = false)
     private Long channelId;
 
+    @ManyToOne
+    @JoinColumn(name = "guild_id")
+    private GuildDTO guild;
+
     private String name;
 
     private String topic;
@@ -27,16 +35,33 @@ public class TextChannelDTO {
 
     private Long parentCategoryId;
 
-    public TextChannelDTO(TextChannel textChannel) {
+    public TextChannelDTO(TextChannel textChannel, GuildDTO guildDTO) {
         this.channelId = textChannel.getIdLong();
+        this.name = textChannel.getName();
+        this.topic = textChannel.getTopic();
+        this.isNSFW = textChannel.isNSFW();
+        this.parentCategoryId = textChannel.getParentCategoryIdLong();
+        this.guild = guildDTO;
+    }
+
+    public TextChannelDTO() {
+    }
+
+    public void updateTextChannelDTO(TextChannel textChannel) {
         this.name = textChannel.getName();
         this.topic = textChannel.getTopic();
         this.isNSFW = textChannel.isNSFW();
         this.parentCategoryId = textChannel.getParentCategoryIdLong();
     }
 
-    public TextChannelDTO() {
+    public boolean hasChanged(TextChannel textChannel) {
+        return !Objects.equals(this.name, textChannel.getName()) ||
+                !Objects.equals(this.topic, textChannel.getTopic()) ||
+                this.isNSFW != textChannel.isNSFW() ||
+                !Objects.equals(this.parentCategoryId, textChannel.getParentCategoryIdLong());
     }
+
+    // Getters and Setters ...
 
     public Long getId() {
         return this.id;
@@ -52,6 +77,14 @@ public class TextChannelDTO {
 
     public void setChannelId(Long channelId) {
         this.channelId = channelId;
+    }
+
+    public GuildDTO getGuild() {
+        return this.guild;
+    }
+
+    public void setGuild(GuildDTO guildDTO) {
+        this.guild = guildDTO;
     }
 
     public String getName() {
@@ -89,7 +122,6 @@ public class TextChannelDTO {
     public void setParentCategoryId(Long parentCategoryId) {
         this.parentCategoryId = parentCategoryId;
     }
-    
 
     @Override
     public String toString() {

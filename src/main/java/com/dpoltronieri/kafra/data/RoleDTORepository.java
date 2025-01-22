@@ -12,4 +12,7 @@ public interface RoleDTORepository extends JpaRepository<RoleDTO, Long> {
     @SuppressWarnings("null")
     Optional<RoleDTO> findById(@NotNull Long id);
 
+    Optional<RoleDTO> findByRoleId(Long roleId);
+
+    Optional<RoleDTO> findByRoleIdAndGuild(Long roleId, GuildDTO guild);
 }

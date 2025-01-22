@@ -26,12 +26,11 @@ public class CommandManagerImpl extends ListenerAdapter {
 
     private List<Command> commands = new ArrayList<>();
     private Map<String, Command> commandMap = new HashMap<>();
+    private JDA jda;
 
-    @Value("${spring.jda.token}")
-    private String token;
-
-    private JDA jda = JDABuilder.createDefault().build();
-
+    public CommandManagerImpl(@Value("${spring.jda.token}") String token) {
+        this.jda = JDABuilder.createDefault(token).build();
+    }
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {

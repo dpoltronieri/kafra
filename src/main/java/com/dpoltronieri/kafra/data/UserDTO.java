@@ -1,33 +1,39 @@
 package com.dpoltronieri.kafra.data;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import net.dv8tion.jda.api.entities.User;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 @Entity
 @Table(name = "users", indexes = {
-    @Index(name = "idx_user_id", columnList = "user_id", unique = true)
+        @Index(name = "idx_user_id", columnList = "user_id", unique = true)
 })
 public class UserDTO {
-    @Id // Mark this field as the primary key
-    @GeneratedValue(strategy = GenerationType.IDENTITY) 
-    private Long id; 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(unique = true, nullable = false)
-    private Long userId; 
+    private Long userId;
 
-    @Column //(name = "user_name") // Optional: Specify column name if different from field name
-    private String username; 
+    @Column
+    private String username;
 
-    @Column //(name = "discriminator")
+    @Column
     private String discriminator;
 
-    @Column //(name = "avatar_url")
+    @Column
     private String avatarUrl;
 
     @Column
@@ -36,9 +42,11 @@ public class UserDTO {
     @Column
     private boolean system;
 
-    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MemberDTO> members = new ArrayList<>();
+
+
     public UserDTO(User user) {
-            // this.id = 
         this.userId = user.getIdLong();
         this.username = user.getName();
         this.discriminator = user.getDiscriminator();
@@ -53,12 +61,19 @@ public class UserDTO {
 
 
     public void updateUserDTO(User user) {
-        // this.discordID = user.getId();
         this.username = user.getName();
         this.discriminator = user.getDiscriminator();
         this.avatarUrl = user.getAvatarUrl();
         this.bot = user.isBot();
         this.system = user.isSystem();
+    }
+
+    public boolean hasChanged(User user) {
+        return !Objects.equals(this.username, user.getName()) ||
+                !Objects.equals(this.discriminator, user.getDiscriminator()) ||
+                !Objects.equals(this.avatarUrl, user.getAvatarUrl()) ||
+                this.bot != user.isBot() ||
+                this.system != user.isSystem();
     }
 
     // Getters and Setters
@@ -140,7 +155,12 @@ public class UserDTO {
         this.userId = discordID;
     }
 
+    public List<MemberDTO> getMembers() {
+        return this.members;
+    }
 
-    
+    public void setMembers(List<MemberDTO> members) {
+        this.members = members;
+    }
 
 }
