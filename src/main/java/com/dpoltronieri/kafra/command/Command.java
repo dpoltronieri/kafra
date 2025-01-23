@@ -2,8 +2,6 @@ package com.dpoltronieri.kafra.command;
 
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
-
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;

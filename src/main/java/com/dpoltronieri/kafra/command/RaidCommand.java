@@ -1,7 +1,6 @@
 package com.dpoltronieri.kafra.command;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -10,12 +9,16 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.dpoltronieri.kafra.data.MemberDTO;
 import com.dpoltronieri.kafra.data.Raid;
 import com.dpoltronieri.kafra.service.DataPersistenceService;
+import com.dpoltronieri.kafra.event.RaidSignUpEvent;
+import com.dpoltronieri.kafra.event.RaidMaybeEvent;
+import com.dpoltronieri.kafra.event.RaidBenchEvent;
+import com.dpoltronieri.kafra.event.RaidWithdrawEvent;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,6 +30,9 @@ public class RaidCommand implements Command {
 
     @Autowired
     private DataPersistenceService dataPersistenceService;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     public String getName() {
@@ -124,153 +130,36 @@ public class RaidCommand implements Command {
 
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
-        // Save data from interaction at the beginning
         dataPersistenceService.saveDataFromInteraction(event);
 
         String componentId = event.getComponentId();
-        String prefix = componentId.substring(0, componentId.indexOf("|"));
-        Long eventId = Long.valueOf(componentId.substring(componentId.indexOf("|") + 1));
+        if (componentId == null) return;
+
+        String[] parts = componentId.split("\\|");
+        if (parts.length != 2) {
+            System.err.println("Invalid button ID format: " + componentId);
+            return;
+        }
+
+        String prefix = parts[0];
+        Long eventId = Long.valueOf(parts[1]);
 
         switch (prefix) {
             case "raid-signup":
-                handleSignUp(event, eventId);
+                applicationEventPublisher.publishEvent(new RaidSignUpEvent(event, eventId));
                 break;
             case "raid-maybe":
-                handleMaybe(event, eventId);
+                applicationEventPublisher.publishEvent(new RaidMaybeEvent(event, eventId));
                 break;
             case "raid-bench":
-                handleBench(event, eventId);
+                applicationEventPublisher.publishEvent(new RaidBenchEvent(event, eventId));
                 break;
             case "raid-withdraw":
-                handleWithdraw(event, eventId);
+                applicationEventPublisher.publishEvent(new RaidWithdrawEvent(event, eventId));
                 break;
+            default:
+                System.err.println("Unknown button interaction: " + componentId);
         }
-    }
-
-    @Transactional
-    private void handleSignUp(ButtonInteractionEvent event, Long eventId) {
-        Raid raid = dataPersistenceService.findRaidByEventId(eventId);
-        if (raid == null) {
-            event.reply("This raid event no longer exists.").setEphemeral(true).queue();
-            return;
-        }
-
-        MemberDTO member = dataPersistenceService.findOrCreateMember(event.getMember());
-
-        // Add participant as confirmed, remove from others, and update embed
-        raid.addConfirmedParticipant(member);
-        raid.removeParticipant(member); // Remove from other lists if present
-        dataPersistenceService.saveRaid(raid);
-        updateRaidEmbed(event, raid);
-
-        event.reply(member.getMemberMention() + ", you've signed up for the raid!").setEphemeral(true).queue();
-    }
-
-    @Transactional
-    private void handleMaybe(ButtonInteractionEvent event, Long eventId) {
-        Raid raid = dataPersistenceService.findRaidByEventId(eventId);
-        if (raid == null) {
-            event.reply("This raid event no longer exists.").setEphemeral(true).queue();
-            return;
-        }
-
-        MemberDTO member = dataPersistenceService.findOrCreateMember(event.getMember());
-
-        // Add participant as unconfirmed, remove from others, and update embed
-        raid.addUnconfirmedParticipant(member);
-        raid.removeParticipant(member); // Remove from other lists if present
-        dataPersistenceService.saveRaid(raid);
-        updateRaidEmbed(event, raid);
-
-        event.reply(member.getMemberMention() + ", you've marked yourself as 'Maybe' for the raid.").setEphemeral(true).queue();
-    }
-
-    @Transactional
-    private void handleBench(ButtonInteractionEvent event, Long eventId) {
-        Raid raid = dataPersistenceService.findRaidByEventId(eventId);
-        if (raid == null) {
-            event.reply("This raid event no longer exists.").setEphemeral(true).queue();
-            return;
-        }
-
-        MemberDTO member = dataPersistenceService.findOrCreateMember(event.getMember());
-
-        // Add participant as benched, remove from others, and update embed
-        raid.addBenchedParticipant(member);
-        raid.removeParticipant(member); // Remove from other lists if present
-        dataPersistenceService.saveRaid(raid);
-        updateRaidEmbed(event, raid);
-
-        event.reply(member.getMemberMention() + ", you've been added to the bench for the raid.").setEphemeral(true).queue();
-    }
-    
-    @Transactional
-    private void handleWithdraw(ButtonInteractionEvent event, Long eventId) {
-        Raid raid = dataPersistenceService.findRaidByEventId(eventId);
-        if (raid == null) {
-            event.reply("This raid event no longer exists.").setEphemeral(true).queue();
-            return;
-        }
-
-        MemberDTO member = dataPersistenceService.findOrCreateMember(event.getMember());
-
-        // Remove participant and update embed
-        raid.removeParticipant(member);
-        dataPersistenceService.saveRaid(raid);
-        updateRaidEmbed(event, raid);
-
-        event.reply(member.getMemberMention() + ", you've withdrawn from the raid.").setEphemeral(true).queue();
-    }
-
-    private void updateRaidEmbed(ButtonInteractionEvent event, Raid raid) {
-        // Fetch the original message embed
-        MessageEmbed originalEmbed = event.getMessage().getEmbeds().get(0);
-        EmbedBuilder updatedEmbed = new EmbedBuilder(originalEmbed);
-
-        // Update the participants fields
-        StringBuilder confirmedParticipantsBuilder = new StringBuilder();
-        if (raid.getConfirmedParticipants().isEmpty()) {
-            confirmedParticipantsBuilder.append(" ");
-        } else {
-            for (MemberDTO participant : raid.getConfirmedParticipants()) {
-                confirmedParticipantsBuilder.append(participant.getMemberMention()).append("\n");
-            }
-        }
-
-        StringBuilder unconfirmedParticipantsBuilder = new StringBuilder();
-        if (raid.getUnconfirmedParticipants().isEmpty()) {
-            unconfirmedParticipantsBuilder.append(" ");
-        } else {
-            for (MemberDTO participant : raid.getUnconfirmedParticipants()) {
-                unconfirmedParticipantsBuilder.append(participant.getMemberMention()).append("\n");
-            }
-        }
-
-        StringBuilder benchedParticipantsBuilder = new StringBuilder();
-        if (raid.getBenchedParticipants().isEmpty()) {
-            benchedParticipantsBuilder.append(" ");
-        } else {
-            for (MemberDTO participant : raid.getBenchedParticipants()) {
-                benchedParticipantsBuilder.append(participant.getMemberMention()).append("\n");
-            }
-        }
-
-        // Update the embed fields
-        updatedEmbed.getFields().clear(); // Clear existing fields
-        updatedEmbed.addField("Date", raid.getDate(), true);
-        updatedEmbed.addField("Time", raid.getTime(), true);
-        if (raid.getSizeLimit() != null) {
-            updatedEmbed.addField("Size Limit", String.valueOf(raid.getSizeLimit()), true);
-        }
-        if (!raid.getDescription().isEmpty()) {
-            updatedEmbed.addField("Description", raid.getDescription(), false);
-        }
-        updatedEmbed.addField("Confirmed Participants", confirmedParticipantsBuilder.toString(), false);
-        updatedEmbed.addField("Unconfirmed Participants", unconfirmedParticipantsBuilder.toString(), false);
-        updatedEmbed.addField("Benched Participants", benchedParticipantsBuilder.toString(), false);
-
-        // Edit the message
-        event.editMessageEmbeds(updatedEmbed.build()).queue();
     }
 
     // Helper methods for validation
