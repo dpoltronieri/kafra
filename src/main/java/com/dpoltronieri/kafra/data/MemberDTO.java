@@ -41,6 +41,8 @@ public class MemberDTO {
 
     private boolean isTimedOut;
 
+    private String memberMention; // New field to store the member's mention string
+
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH })
     @JoinTable(name = "member_role",
             joinColumns = @JoinColumn(name = "member_id"),
@@ -55,10 +57,11 @@ public class MemberDTO {
         this.guild = guildDTO;
         this.nickname = member.getNickname();
         this.isTimedOut = member.isTimedOut();
+        this.memberMention = member.getAsMention(); // Capture the mention string
         // Map the Member's Roles to RoleDTOs
         this.roles = new ArrayList<>();
         for (Role role : member.getRoles()) {
-            RoleDTO roleDTO = new RoleDTO(role, guildDTO); // Assuming you have a RoleDTO constructor that takes a Role
+            RoleDTO roleDTO = new RoleDTO(role, guildDTO);
             this.roles.add(roleDTO);
         }
     }
@@ -69,6 +72,7 @@ public class MemberDTO {
     public void updateMemberDTO(Member member) {
         this.nickname = member.getNickname();
         this.isTimedOut = member.isTimedOut();
+        this.memberMention = member.getAsMention(); // Update the mention string
 
         // Update roles - efficiently handle additions and removals
         List<Role> memberRoles = member.getRoles();
@@ -78,7 +82,7 @@ public class MemberDTO {
         for (Role role : memberRoles) {
             RoleDTO roleDTO = findRoleDTO(role.getIdLong()); // Helper method to find RoleDTO by roleId
             if (roleDTO == null) {
-                // Role not found, create a new one (assuming you have a method to find or create RoleDTO by Role)
+                // Role not found, create a new one
                 roleDTO = new RoleDTO(role, this.guild);
             }
             updatedRoles.add(roleDTO);
@@ -94,6 +98,9 @@ public class MemberDTO {
             return true;
         }
         if (this.isTimedOut != member.isTimedOut()) {
+            return true;
+        }
+        if (!Objects.equals(this.memberMention, member.getAsMention())) { // Compare mention strings
             return true;
         }
 
@@ -174,6 +181,14 @@ public class MemberDTO {
 
     public void setIsTimedOut(boolean isTimedOut) {
         this.isTimedOut = isTimedOut;
+    }
+
+    public String getMemberMention() {
+        return this.memberMention;
+    }
+    
+    public void setMemberMention(String memberMention) {
+        this.memberMention = memberMention;
     }
 
     public List<RoleDTO> getRoles() {

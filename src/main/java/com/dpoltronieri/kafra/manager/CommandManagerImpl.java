@@ -76,8 +76,25 @@ public class CommandManagerImpl extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        try{
-        commandMap.get(event.getButton().getId()).onButtonInteraction(event);
+        try {
+            String componentId = event.getComponentId();
+            if (componentId == null) return;
+
+            String[] parts = componentId.split("\\|"); // Split using | (escaped for regex)
+            if (parts.length != 2) {
+                System.err.println("Invalid button ID format: " + componentId);
+                return;
+            }
+
+            String commandPrefix = parts[0] + "|"; // Includes the separator
+            // Long eventId = Long.valueOf(parts[1]);
+            Command command = commandMap.get(commandPrefix);
+
+            if (command != null) {
+                command.onButtonInteraction(event);
+            } else {
+                System.err.println("Unknown button interaction or command not found for prefix: " + commandPrefix);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

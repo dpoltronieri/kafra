@@ -12,19 +12,12 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 public interface Command {
 
     String getName();
-
-    List<String> getButtons();
-
-    List<String> getModals();
-
     String getDescription();
-
     List<OptionData> getOptions();
-
-    void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event);
-
-    void onButtonInteraction(@NotNull ButtonInteractionEvent event);
-
-    void onModalInteraction(@NotNull ModalInteractionEvent event);
+    void onSlashCommandInteraction(SlashCommandInteractionEvent event);
+    void onButtonInteraction(ButtonInteractionEvent event);
+    void onModalInteraction(ModalInteractionEvent event);
+    List<String> getButtons();
+    List<String> getModals();
     
 }
