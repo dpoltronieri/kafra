@@ -54,10 +54,6 @@ public class CommandManagerImpl extends ListenerAdapter {
         }
     }
 
-    public void add(Command command) {
-        commands.add(command);
-    }
-
     @Autowired
     public void configureCommands(List<Command> commands) {
         commands.forEach((command) -> {

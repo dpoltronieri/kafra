@@ -9,6 +9,9 @@ import com.dpoltronieri.kafra.event.RaidWithdrawEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -188,8 +191,8 @@ public class RaidEventHandler {
 
         // Update the embed fields
         updatedEmbed.getFields().clear(); // Clear existing fields
-        updatedEmbed.addField("Date", raid.getDate(), true);
-        updatedEmbed.addField("Time", raid.getTime(), true);
+        // Use the combined dateTime field and format it
+        updatedEmbed.addField("Date and Time", raid.getDateTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), true);
         if (raid.getSizeLimit() != null) {
             updatedEmbed.addField("Size Limit", String.valueOf(raid.getSizeLimit()), true);
         }

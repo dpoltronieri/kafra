@@ -4,6 +4,8 @@ import com.dpoltronieri.kafra.data.GuildDTO;
 import com.dpoltronieri.kafra.data.GuildDTORepository;
 import com.dpoltronieri.kafra.data.MemberDTO;
 import com.dpoltronieri.kafra.data.MemberDTORepository;
+import com.dpoltronieri.kafra.data.Mission;
+import com.dpoltronieri.kafra.data.MissionRepository;
 import com.dpoltronieri.kafra.data.Raid;
 import com.dpoltronieri.kafra.data.RaidRepository;
 import com.dpoltronieri.kafra.data.RoleDTO;
@@ -21,6 +23,9 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
+
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -37,19 +42,22 @@ public class DataPersistenceService {
     private final RoleDTORepository roleRepository;
     private final TextChannelDTORepository textChannelRepository;
     private final RaidRepository raidRepository;
+    private final MissionRepository missionRepository;
 
     public DataPersistenceService(GuildDTORepository guildRepository,
                                     UserDTORepository userRepository,
                                     MemberDTORepository memberRepository,
                                     RoleDTORepository roleRepository,
                                     TextChannelDTORepository textChannelRepository,
-                                    RaidRepository raidRepository) {
+                                    RaidRepository raidRepository,
+                                    MissionRepository missionRepository) {
         this.guildRepository = guildRepository;
         this.userRepository = userRepository;
         this.memberRepository = memberRepository;
         this.roleRepository = roleRepository;
         this.textChannelRepository = textChannelRepository;
         this.raidRepository = raidRepository;
+        this.missionRepository = missionRepository;
     }
 
     // ... other methods for Guild, User, Member, Role, TextChannel, Raid ...
@@ -239,4 +247,48 @@ public class DataPersistenceService {
                     return memberRepository.save(newMemberDTO);
                 });
     }
+
+        @Transactional(readOnly = true)
+        public GuildDTO findOrCreateGuild(Guild guild) {
+            if (guild == null) {
+                return null;
+            }
+            return guildRepository.findByGuildId(guild.getIdLong())
+                    .orElseGet(() -> {
+                        GuildDTO newGuildDTO = new GuildDTO(guild);
+                        logger.info("Creating new GuildDTO for guildId: {}", guild.getIdLong());
+                        return guildRepository.save(newGuildDTO);
+                    });
+        }
+
+        @Transactional
+        public Mission createMission(String name, String type, String description, MemberDTO creator, GuildDTO guild) {
+            Mission mission = new Mission(name, type, description, creator, guild);
+            return missionRepository.save(mission);
+        }
+
+        @Transactional(readOnly = true)
+        public Mission findMissionByNameAndGuild(String name, GuildDTO guild) {
+            return missionRepository.findByNameAndGuild(name, guild).orElse(null);
+        }
+
+        @Transactional(readOnly = true)
+        public List<Mission> findMissionsByTypeAndGuild(String type, GuildDTO guild) {
+            return missionRepository.findByTypeAndGuild(type, guild);
+        }
+
+        @Transactional(readOnly = true)
+        public List<Mission> findMissionsByGuild(GuildDTO guild) {
+            return missionRepository.findByGuild(guild);
+        }
+
+        @Transactional(readOnly = true)
+        public Mission findMissionByIdAndGuild(Long id, GuildDTO guild) {
+            return missionRepository.findByIdAndGuild(id, guild).orElse(null);
+        }
+
+        @Transactional
+        public void deleteMission(Mission mission) {
+            missionRepository.delete(mission);
+        }
 }

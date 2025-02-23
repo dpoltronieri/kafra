@@ -1,5 +1,6 @@
 package com.dpoltronieri.kafra.data;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,6 +11,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,12 +22,14 @@ public class Raid {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // @Transient
+    @Column(name = "event_id")
     private Long eventId; // Still useful for temporary association with the message, but won't be persisted as is
 
     private String name;
-    private String date;
-    private String time;
+
+    @Column(name = "date_time")
+    private LocalDateTime dateTime;
+
     private String description;
     private Integer sizeLimit;
 
@@ -66,11 +70,10 @@ public class Raid {
     }
     
     // Updated constructor to match new signature
-    public Raid(Long eventId, String name, String date, String time, String description, Integer sizeLimit, MemberDTO creator) {
+    public Raid(Long eventId, String name, LocalDateTime dateTime, String description, Integer sizeLimit, MemberDTO creator) {
         this.eventId = eventId;
         this.name = name;
-        this.date = date;
-        this.time = time;
+        this.dateTime = dateTime;
         this.description = description;
         this.sizeLimit = sizeLimit;
         this.creator = creator;
@@ -93,12 +96,8 @@ public class Raid {
         return name;
     }
 
-    public String getDate() {
-        return date;
-    }
-
-    public String getTime() {
-        return time;
+    public LocalDateTime getDateTime() {
+        return dateTime;
     }
 
     public String getDescription() {
@@ -138,12 +137,8 @@ public class Raid {
         this.name = name;
     }
 
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
     }
 
     public void setDescription(String description) {
