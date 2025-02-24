@@ -20,6 +20,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 
 @Service
 public class CommandManagerImpl extends ListenerAdapter {
@@ -29,7 +30,7 @@ public class CommandManagerImpl extends ListenerAdapter {
     private JDA jda;
 
     public CommandManagerImpl(@Value("${spring.jda.token}") String token) {
-        this.jda = JDABuilder.createDefault(token).build();
+        this.jda = JDABuilder.createDefault(token).enableIntents(GatewayIntent.MESSAGE_CONTENT).build();
     }
 
     @Override

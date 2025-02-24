@@ -1,5 +1,19 @@
-{"properties": [{
-  "name": "spring.jda.token",
-  "type": "java.lang.String",
-  "description": "Discord connection token"
-}]}
+{"properties": [
+  {
+    "name": "spring.jda.token",
+    "type": "java.lang.String",
+    "description": "Discord connection token"
+  },
+  {
+    "name": "GEMINI_API_KEY",
+    "type": "java.lang.String",
+    "description": "A description for 'GEMINI_API_KEY'"
+  }
+]} "description": "Discord connection token"
+  },
+  {
+    "name": "GEMINI_API_KEY",
+    "type": "java.lang.String",
+    "description": "A description for 'GEMINI_API_KEY'"
+  }
+]}
