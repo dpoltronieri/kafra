@@ -27,7 +27,19 @@ public class GeminiAIService {
     public String summarizeText(String text) {
         String prompt = "Summarize the following forum post messages:\n\n" + text + "\n\nProvide a concise summary.";
         try {
-            return chatLanguageModel.generate(prompt);
+            return chatLanguageModel.chat(prompt);
+        } catch (Exception e) {
+            System.err.println("Error calling Gemini API (via LangChain4j): " + e.getMessage());
+            return "Error summarizing the forum post.";
+        }
+    }
+
+    public String summarizeText(String header, String tailer, String text) {
+        String prompt = header + "\n"
+        + text + "\n"
+        + tailer; 
+        try {
+            return chatLanguageModel.chat(prompt);
         } catch (Exception e) {
             System.err.println("Error calling Gemini API (via LangChain4j): " + e.getMessage());
             return "Error summarizing the forum post.";
