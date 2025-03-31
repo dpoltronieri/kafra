@@ -19,7 +19,7 @@ public class GeminiAIService {
 
         chatLanguageModel = GoogleAiGeminiChatModel.builder()
                 .apiKey(apiKey)
-                .modelName("gemini-pro") // Or "gemini-1.0-pro" - check Gemini API docs
+                .modelName("gemini-2.0-flash") // Or "gemini-1.0-pro" - check Gemini API docs
                 .temperature(0.7)      // Adjust temperature as needed
                 .build();
     }

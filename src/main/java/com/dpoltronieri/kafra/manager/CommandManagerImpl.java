@@ -77,23 +77,27 @@ public class CommandManagerImpl extends ListenerAdapter {
             String componentId = event.getComponentId();
             if (componentId == null) return;
 
-            String[] parts = componentId.split("\\|"); // Split using | (escaped for regex)
-            if (parts.length != 2) {
-                System.err.println("Invalid button ID format: " + componentId);
-                return;
+            Command command = null;
+            if (componentId.contains("|")) { // Check if componentId contains "|" - indicates complex ID
+                String[] parts = componentId.split("\\|"); // Split using |
+                if (parts.length == 2) { // Expecting two parts for complex ID format
+                    String commandPrefix = parts[0] + "|"; // Reconstruct command prefix
+                    command = commandMap.get(commandPrefix); // Lookup command by prefix
+                } else {
+                    System.err.println("Invalid complex button ID format: " + componentId); // Log error for invalid complex ID
+                    return;
+                }
+            } else { // Assume it's a simple button ID if no "|" is present
+                command = commandMap.get(componentId); // Directly lookup command by componentId (simple ID)
             }
-
-            String commandPrefix = parts[0] + "|"; // Includes the separator
-            // Long eventId = Long.valueOf(parts[1]);
-            Command command = commandMap.get(commandPrefix);
 
             if (command != null) {
-                command.onButtonInteraction(event);
+                command.onButtonInteraction(event); // Dispatch button interaction to the command
             } else {
-                System.err.println("Unknown button interaction or command not found for prefix: " + commandPrefix);
+                System.err.println("Unknown button interaction or command not found for ID: " + componentId); // Log if command not found
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Generic error handling
         }
     }
 
