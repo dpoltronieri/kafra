@@ -19,6 +19,7 @@
 - Encountered `UnsatisfiedDependencyException` due to missing `spring.ai.gemini_api_key` property. Added a placeholder value to `application.properties`.
 - Encountered `IllegalArgumentException: Token may not be empty` due to empty `spring.jda.token` property. Added a placeholder value to `application.properties`.
 - Maven build now completes successfully.
+- Updated the `CommandManager` interface and `CommandManagerImpl` class to reflect the command management implementation.
 
 ## Active Decisions and Considerations
 

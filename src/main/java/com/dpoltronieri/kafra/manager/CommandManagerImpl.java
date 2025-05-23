@@ -25,7 +25,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 @Service
-public class CommandManagerImpl extends ListenerAdapter {
+public class CommandManagerImpl extends ListenerAdapter implements CommandManager {
 
     private static final Logger log = LoggerFactory.getLogger(CommandManagerImpl.class);
 
