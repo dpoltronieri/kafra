@@ -14,6 +14,12 @@
 
 - Await specific task from the user.
 
+## Troubleshooting
+
+- Encountered `UnsatisfiedDependencyException` due to missing `spring.ai.gemini_api_key` property. Added a placeholder value to `application.properties`.
+- Encountered `IllegalArgumentException: Token may not be empty` due to empty `spring.jda.token` property. Added a placeholder value to `application.properties`.
+- Maven build now completes successfully.
+
 ## Active Decisions and Considerations
 
 - Ensure all core Memory Bank files are present and contain relevant information.

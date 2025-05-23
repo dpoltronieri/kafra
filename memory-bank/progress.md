@@ -24,3 +24,9 @@
 
 - The initial decision to use Java and Spring Boot is evident.
 - The use of a Memory Bank for documentation is a key project decision for my operation.
+
+## Recent Progress
+
+- Resolved `UnsatisfiedDependencyException` by adding `spring.ai.gemini_api_key` to `application.properties`.
+- Resolved `IllegalArgumentException: Token may not be empty` by adding `spring.jda.token` to `application.properties`.
+- Maven build now completes successfully.

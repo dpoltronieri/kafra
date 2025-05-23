@@ -9,6 +9,12 @@
 - **Database:** Relational Database (inferred, specific type not yet determined)
 - **Logging:** Logback (based on `logback-spring.xml`)
 - **AI Integration:** Gemini AI (based on `GeminiAIService.java`)
+- **Discord Integration:** JDA (Java Discord API)
+
+## Required Properties
+
+- `spring.ai.gemini_api_key`: API key for Gemini AI integration.
+- `spring.jda.token`: Token for the Discord bot.
 
 ## Development Setup
 
